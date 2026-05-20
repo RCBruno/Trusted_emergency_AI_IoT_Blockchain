@@ -1,0 +1,120 @@
+# Hyperledger Caliper — Benchmark Configuration
+# Emergency Logistics System Performance Evaluation
+#
+# Test Scenarios:
+#   B1 — IoT Sensor Write Throughput (varying load: 10, 50, 100, 200 TPS target)
+#   B2 — Supplier Evaluation Read Throughput
+#   B3 — Contract Lifecycle (create + terminate)
+#   B4 — Mixed Workload (70% sensor writes, 20% reads, 10% contract ops)
+#
+# Paper: "Trusted Emergency Logistics via Agentic AI, IoT, and Blockchain"
+
+test:
+  name: emergency-logistics-benchmark
+  description: >
+    Performance evaluation of the Emergency Logistics blockchain layer.
+    Measures transaction throughput (TPS) and PBFT consensus latency
+    under varying network loads as required by reviewer comment (2).
+  workers:
+    number: 4
+
+  rounds:
+    # ── B1a: IoT Write — low load (10 TPS target) ───────────────────────────
+    - label: b1a-sensor-write-10tps
+      description: IoT sensor data anchoring at low load (10 TPS target)
+      txNumber: 500
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 10
+      workload:
+        module: workload/sensorWrite.js
+        arguments:
+          contractId: emergency-logistics
+          sensorCount: 7
+
+    # ── B1b: IoT Write — medium load (50 TPS target) ─────────────────────────
+    - label: b1b-sensor-write-50tps
+      description: IoT sensor data anchoring at medium load (50 TPS target)
+      txNumber: 2000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 50
+      workload:
+        module: workload/sensorWrite.js
+        arguments:
+          contractId: emergency-logistics
+          sensorCount: 7
+
+    # ── B1c: IoT Write — high load (100 TPS target) ──────────────────────────
+    - label: b1c-sensor-write-100tps
+      description: IoT sensor data anchoring at high load (100 TPS target)
+      txNumber: 5000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 100
+      workload:
+        module: workload/sensorWrite.js
+        arguments:
+          contractId: emergency-logistics
+          sensorCount: 7
+
+    # ── B1d: IoT Write — stress load (200 TPS target) ────────────────────────
+    - label: b1d-sensor-write-200tps
+      description: IoT sensor data anchoring at stress load (200 TPS target)
+      txNumber: 8000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 200
+      workload:
+        module: workload/sensorWrite.js
+        arguments:
+          contractId: emergency-logistics
+          sensorCount: 7
+
+    # ── B2: Supplier Evaluation Read Throughput ───────────────────────────────
+    - label: b2-evaluation-read
+      description: Read throughput for agent queries on supplier evaluations
+      txNumber: 3000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 100
+      workload:
+        module: workload/evaluationRead.js
+        arguments:
+          contractId: emergency-logistics
+
+    # ── B3: Contract Lifecycle (create + terminate) ───────────────────────────
+    - label: b3-contract-lifecycle
+      description: Full contract create-then-terminate lifecycle latency
+      txNumber: 1000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 20
+      workload:
+        module: workload/contractLifecycle.js
+        arguments:
+          contractId: emergency-logistics
+          coordinatorId: COORDINATOR_AGENT_001
+
+    # ── B4: Mixed Workload ────────────────────────────────────────────────────
+    - label: b4-mixed-workload
+      description: Realistic mixed workload (70% write, 20% read, 10% contract)
+      txNumber: 5000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 80
+      workload:
+        module: workload/mixedWorkload.js
+        arguments:
+          contractId: emergency-logistics
+          sensorCount: 7
+          writeRatio: 0.70
+          readRatio:  0.20
+          contractRatio: 0.10
